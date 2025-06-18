@@ -1,0 +1,31 @@
+{
+  // SlidesSnap - Text-to-Image Generator Configuration
+  "name": "slidesnap",
+  "main": "dist/index.js",
+  "compatibility_date": "2025-06-18",
+  
+  // Enable Node.js compatibility for Canvas API
+  "compatibility_flags": ["nodejs_compat"],
+  
+  // Static assets configuration
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS"
+  },
+  
+  // Environment variables
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  
+  // Build configuration
+  "build": {
+    "command": "npm run build"
+  },
+  
+  // Development configuration
+  "dev": {
+    "port": 8787,
+    "local_protocol": "http"
+  }
+}
