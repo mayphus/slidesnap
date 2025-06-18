@@ -5,13 +5,17 @@
   "description": "Text-to-image generator for social media platforms",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "wrangler dev",
+    "dev:remote": "wrangler dev --remote",
     "build": "vite build",
+    "build:watch": "vite build --watch",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "lint": "eslint src --ext .ts,.tsx",
-    "type-check": "tsc --noEmit"
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch"
   },
   "keywords": [
     "cloudflare-workers",

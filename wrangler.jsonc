@@ -2,7 +2,7 @@
   // SlidesSnap - Text-to-Image Generator Configuration
   "name": "slidesnap",
   "main": "dist/index.js",
-  "compatibility_date": "2025-06-18",
+  "compatibility_date": "2025-06-12",
   
   // Enable Node.js compatibility for Canvas API
   "compatibility_flags": ["nodejs_compat"],

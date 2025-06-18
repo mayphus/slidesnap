@@ -61,15 +61,17 @@ app.get('/', (c) => {
                                 </div>
                             </div>
                             
-                            <div id="customColors" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
-                                    <input type="color" id="bgColor" value="#ffffff" class="w-full h-10 border border-gray-300 rounded-lg">
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
-                                    <input type="color" id="textColor" value="#000000" class="w-full h-10 border border-gray-300 rounded-lg">
+                            <div id="customColors" class="mt-4 hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
+                                        <input type="color" id="bgColor" value="#ffffff" class="w-full h-10 border border-gray-300 rounded-lg">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                                        <input type="color" id="textColor" value="#000000" class="w-full h-10 border border-gray-300 rounded-lg">
+                                    </div>
                                 </div>
                             </div>
                             
