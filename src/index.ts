@@ -37,26 +37,21 @@ app.get('/', (c) => {
                         <form id="textForm">
                             <textarea id="textInput" 
                                       placeholder="Enter your text here... (Supports paragraph breaks)" 
-                                      class="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
+                                      class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
                             
                             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Platform</label>
-                                    <select id="templateSelect" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                        <option value="">Loading templates...</option>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Color Theme</label>
+                                    <select id="colorTheme" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="light">Light (White/Black)</option>
+                                        <option value="dark">Dark (Black/White)</option>
+                                        <option value="blue">Blue Theme</option>
+                                        <option value="green">Green Theme</option>
+                                        <option value="purple">Purple Theme</option>
+                                        <option value="red">Red Theme</option>
+                                        <option value="orange">Orange Theme</option>
+                                        <option value="custom">Custom Colors</option>
                                     </select>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
-                                    <input type="color" id="bgColor" value="#ffffff" class="w-full h-10 border border-gray-300 rounded-lg">
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
-                                    <input type="color" id="textColor" value="#000000" class="w-full h-10 border border-gray-300 rounded-lg">
                                 </div>
                                 
                                 <div>
@@ -66,23 +61,32 @@ app.get('/', (c) => {
                                 </div>
                             </div>
                             
-                            <button type="submit" 
-                                    class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    id="generateBtn">
-                                Generate Image
-                            </button>
+                            <div id="customColors" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
+                                    <input type="color" id="bgColor" value="#ffffff" class="w-full h-10 border border-gray-300 rounded-lg">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                                    <input type="color" id="textColor" value="#000000" class="w-full h-10 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            
+                            <p class="text-sm text-gray-500 mt-6 text-center">Generates instantly as you type</p>
                         </form>
                     </div>
                     
                     <!-- Preview Section -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-semibold mb-4">Preview</h2>
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center min-h-96 flex items-center justify-center">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center min-h-96 flex items-start justify-center overflow-auto max-h-[600px]">
                             <div id="previewArea">
                                 <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                                 <p class="text-gray-500">Your generated image will appear here</p>
+                                <p class="text-sm text-gray-400 mt-2">Type some text to generate automatically</p>
                             </div>
                         </div>
                         
@@ -107,59 +111,101 @@ app.get('/', (c) => {
 
     <script>
         let currentImageBlob = null;
+        let generateTimeout = null;
+        
+        // Color theme presets
+        const colorThemes = {
+            light: { bg: '#ffffff', text: '#000000' },
+            dark: { bg: '#000000', text: '#ffffff' },
+            blue: { bg: '#1e40af', text: '#ffffff' },
+            green: { bg: '#059669', text: '#ffffff' },
+            purple: { bg: '#7c3aed', text: '#ffffff' },
+            red: { bg: '#dc2626', text: '#ffffff' },
+            orange: { bg: '#ea580c', text: '#ffffff' },
+            custom: { bg: '#ffffff', text: '#000000' }
+        };
 
-        // Load templates on page load
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/api/templates');
-                const data = await response.json();
-                const select = document.getElementById('templateSelect');
-                
-                select.innerHTML = '<option value="">Select a platform...</option>';
-                data.templates.forEach(template => {
-                    const option = document.createElement('option');
-                    option.value = template.id;
-                    option.textContent = template.name;
-                    // Set RedNote as default
-                    if (template.id === 'rednote') {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Failed to load templates:', error);
-                document.getElementById('templateSelect').innerHTML = '<option value="">Error loading templates</option>';
+        // Auto-generate function with instant text generation
+        function scheduleGenerateInstant() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                // Clear preview if no text
+                const previewArea = document.getElementById('previewArea');
+                previewArea.innerHTML = \`
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-gray-500">Your generated image will appear here</p>
+                    <p class="text-sm text-gray-400 mt-2">Type some text to generate instantly</p>
+                \`;
+                document.getElementById('downloadSection').classList.add('hidden');
+                return;
             }
+            
+            // Generate immediately
+            generateImage();
+        }
+        
+        // Auto-generate function with small debouncing for controls
+        function scheduleGenerateDebounced() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) return;
+            
+            // Clear existing timeout
+            if (generateTimeout) {
+                clearTimeout(generateTimeout);
+            }
+            
+            // Set new timeout for debounced generation
+            generateTimeout = setTimeout(generateImage, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set up event listeners for auto-generation
+            document.getElementById('textInput').addEventListener('input', scheduleGenerateInstant);
+            document.getElementById('fontSize').addEventListener('input', scheduleGenerateDebounced);
+            document.getElementById('colorTheme').addEventListener('change', applyColorTheme);
+            
+            // Set up custom color inputs
+            document.getElementById('bgColor').addEventListener('input', scheduleGenerateDebounced);
+            document.getElementById('textColor').addEventListener('input', scheduleGenerateDebounced);
+            
+            // Apply initial color theme
+            applyColorTheme();
         });
+
+        // Color theme handling
+        function applyColorTheme() {
+            const theme = document.getElementById('colorTheme').value;
+            const customColorsDiv = document.getElementById('customColors');
+            
+            if (theme === 'custom') {
+                customColorsDiv.classList.remove('hidden');
+            } else {
+                customColorsDiv.classList.add('hidden');
+                const colors = colorThemes[theme];
+                document.getElementById('bgColor').value = colors.bg;
+                document.getElementById('textColor').value = colors.text;
+                scheduleGenerateInstant();
+            }
+        }
 
         // Font size slider
         document.getElementById('fontSize').addEventListener('input', (e) => {
             document.getElementById('fontSizeValue').textContent = e.target.value + 'px';
         });
 
-        // Form submission
-        document.getElementById('textForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
+        // Image generation function
+        async function generateImage() {
             const text = document.getElementById('textInput').value.trim();
-            const templateId = document.getElementById('templateSelect').value;
+            if (!text) return;
+            
             const backgroundColor = document.getElementById('bgColor').value;
             const textColor = document.getElementById('textColor').value;
             const fontSize = parseInt(document.getElementById('fontSize').value);
             
-            if (!text) {
-                alert('Please enter some text');
-                return;
-            }
-            
-            if (!templateId) {
-                alert('Please select a platform');
-                return;
-            }
-            
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.disabled = true;
-            generateBtn.textContent = 'Generating...';
+            // Use article template for general purpose
+            const templateId = 'article';
             
             try {
                 const response = await fetch('/api/generate', {
@@ -180,41 +226,30 @@ app.get('/', (c) => {
                     throw new Error('Failed to generate image');
                 }
                 
-                // Check if response is SVG
-                const contentType = response.headers.get('content-type');
+                // Handle SVG response
+                const svgText = await response.text();
+                currentImageBlob = new Blob([svgText], { type: 'image/svg+xml' });
                 
-                if (contentType && contentType.includes('image/svg+xml')) {
-                    // Handle SVG - convert to data URL for better browser compatibility
-                    const svgText = await response.text();
-                    currentImageBlob = new Blob([svgText], { type: 'image/svg+xml' });
-                    
-                    // Create data URL for SVG
-                    const svgDataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgText)));
-                    
-                    // Display SVG as image with data URL
-                    const previewArea = document.getElementById('previewArea');
-                    previewArea.innerHTML = \`<img src="\${svgDataUrl}" alt="Generated image" class="max-w-full h-auto rounded-lg shadow-lg" style="max-height: 400px;">\`;
-                } else {
-                    // Handle other image formats (PNG, etc.)
-                    const blob = await response.blob();
-                    currentImageBlob = blob;
-                    
-                    // Display image
-                    const imageUrl = URL.createObjectURL(blob);
-                    const previewArea = document.getElementById('previewArea');
-                    previewArea.innerHTML = \`<img src="\${imageUrl}" alt="Generated image" class="max-w-full h-auto rounded-lg shadow-lg">\`;
-                }
+                // Create data URL for SVG
+                const svgDataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgText)));
+                
+                // Display SVG as image with data URL
+                const previewArea = document.getElementById('previewArea');
+                previewArea.innerHTML = \`<img src="\${svgDataUrl}" alt="Generated image" class="max-w-full h-auto rounded-lg shadow-lg">\`;
                 
                 // Show download button
                 document.getElementById('downloadSection').classList.remove('hidden');
                 
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to generate image. Please try again.');
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.textContent = 'Generate Image';
+                const previewArea = document.getElementById('previewArea');
+                previewArea.innerHTML = \`<p class="text-red-500">Error generating image. Please try again.</p>\`;
             }
+        }
+
+        // Prevent form submission
+        document.getElementById('textForm').addEventListener('submit', (e) => {
+            e.preventDefault();
         });
 
         // SVG Download functionality

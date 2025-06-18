@@ -174,7 +174,7 @@ export class SVGRenderer {
     const svgLines: string[] = [];
     let currentY = startY;
     
-    displayLines.forEach((line, index) => {
+    displayLines.forEach((line) => {
       if (line === '') {
         // Empty line for paragraph spacing - use smaller gap (half line height)
         currentY += (fontSize * template.lineHeight) * 0.5;
