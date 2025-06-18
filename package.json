@@ -19,7 +19,7 @@
     "social-media",
     "canvas"
   ],
-  "author": "Your Name",
+  "author": "Mayphus",
   "license": "MIT",
   "dependencies": {
     "hono": "^4.6.3"
